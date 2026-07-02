@@ -23,6 +23,15 @@ Ask **one question at a time**; wait for the answer before the next. Aim the fir
 | **Escalation** | Empty; or "ask me if you're unsure" | "A unit in the field never *feels* unsure — it presses on. So name the *situations*: which class of call is yours, not its? Where's the cost high and hard to undo?" |
 | **Done-criteria** | Empty (**hard-stop**); or "I'll know when it's done" | "Name the check and the result you expect — 'ran X, saw Y.' Without it, no one on the ground knows where to halt." |
 
+### Tri-state source for the progress tracker
+
+The tracker in `SKILL.md` shows one glyph per box; this table is what defines them:
+- **○ empty** — the box has no answer yet.
+- **◐ thin** — the box has an answer, but it trips the "tell" column above (Intent that restates the task, Target written as steps, Boundaries that are preferences, Escalation that's empty or "ask if unsure", etc.).
+- **● solid** — the answer cleared the challenge.
+
+Re-render the tracker whenever a box crosses one of these thresholds — that's the cadence, never once-per-turn.
+
 ## Go/no-go bar
 
 - **Proceed when** Intent + Escalation are substantive **and** Done-criteria is non-empty. Then move to Phase 3. Not there yet → keep chasing whichever box is still thin.

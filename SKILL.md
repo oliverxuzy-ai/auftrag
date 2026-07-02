@@ -38,6 +38,18 @@ It matters more for agents than for people, because agents have two failure mode
 **Phase 0 — Open (dump first)**
 Don't present a table. Open with a single line in the staff-officer register — e.g. *"Give me the whole thing you're about to delegate, in one go — however unordered. I'll sort it into the brief."* Then wait for the dump.
 
+**Progress view — the five-box tracker (Phase 1 onward)**
+From Phase 1 on — once there's something sorted into boxes — keep a one-line tracker visible, re-rendered **whenever a box changes state** (each answer that lands or gets re-classified), *not* every turn. It shows **state glyphs only** — never the commander's words, never a summary of a box's content (that would make it a second ghost-writer). Phase 0 stays clean: no tracker while the commander is still dumping.
+
+Glyphs: `○` empty (untouched) · `◐` thin (tripped a "tell" in `references/grill-heuristics.md`) · `●` solid (cleared the challenge). Render it in a fenced block so the row aligns:
+
+```
+● Intent   ◐ Target   ○ Boundaries   ○ Escalation   ○ Done
+Go/no-go: ✖
+```
+
+The `Go/no-go` glyph reuses the existing go/no-go bar with **no new criterion**: `✔ 可发` when Intent + Escalation are solid **and** Done is non-empty; otherwise `✖`.
+
 **Phase 1 — Sort into boxes (don't ghost-write)**
 Attribute what they dumped into the five boxes. Sorting means placing **their words** into the right box — not filling gaps with yours. A box they didn't touch is empty; mark it, ask later, don't fill it for them.
 
@@ -76,6 +88,7 @@ Once the boxes clear the go/no-go bar, assemble them into a brief **in the user'
 - **Don't rush to add hooks / validation scripts / automation** — v0 stays as small as possible.
 - **Don't make it a system** — a guided flow + a template + a Todoist write + one closing question, that's all.
 - **Don't turn the boundaries box into a big checklist** — the boundaries it guides the user to write stay minimal, and so does its own complexity.
+- **Interactive widgets only on the seams, never on the box contents** — the tracker, the Todoist placement menu, and the dispatch/store menu are the only interactive controls, and they sit on decision/navigation/confirmation seams. The instant a menu offers candidate *answers* for any of the five boxes, this skill has committed its own #1 sin (writing the commander's words). Tracker = state glyphs only; Todoist menu = metadata only; dispatch preview = echoes only what's about to be sent.
 
 ---
 
