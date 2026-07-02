@@ -1,0 +1,9 @@
+# macOS
+.DS_Store
+
+# editor / OS cruft
+*.swp
+Thumbs.db
+
+# raw session transcripts — kept locally, not published
+experiments/
