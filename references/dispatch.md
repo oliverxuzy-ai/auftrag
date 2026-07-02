@@ -40,7 +40,14 @@ mcp__claude_ai_todoist__add-tasks {
 - Hand the task URL back.
 - On MCP failure: report it, don't claim success, and don't dispatch an agent on top of a failed write.
 
-## Step 3 — Ask "dispatch now, or store?"
+## Step 3 — "Dispatch now, or store?" (menu with preview)
+
+Ask with **one `AskUserQuestion` single-select** (single-select is what enables `preview`), so the commander sees the actual artifact of each path before choosing:
+
+- **「派发 now」** — `preview` = the exact mission prompt the Agent tool will receive: the escalation-prepend paragraph (see "Dispatching a subagent" below) + the full brief markdown.
+- **「存档」** — `preview` = the resume line, verbatim: `/start-todo <task_url>`.
+
+No third option; Esc = cancel. Then act on the choice:
 
 - **Store** → it's in Todoist; that's the mission on file. End your report with the one command that resumes it — ready to paste, nothing to retype:
 
