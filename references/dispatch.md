@@ -18,7 +18,12 @@ Then put a proposed placement in front of the commander for sign-off. It is a **
 - **Priority** — read off the urgency / ticket signals already in the brief, as todoist's `p1`–`p4` (`p1` highest, `p4` the default). No signal → `p4`.
 - **Due / deadline** — only if the brief implies a time: `dueString` (natural language) for a soft schedule, `deadlineDate` (ISO `YYYY-MM-DD`) for a hard constraint. No signal → leave unset.
 
-Report it in one line — *"Proposed placement: `<project>` · `<priority>` · `<due>`. Confirm, or redirect?"* — and create only on the commander's `yes`. If nothing clearly fits, fall back to the inbox and ask which project in one line. Then create:
+Put the placement in front of the commander as **one `AskUserQuestion` call** (up to two questions) — a click, not a line to read back:
+
+- **项目 (single-select)** — the ≤3 best-matched projects from `find-projects`, best match first and labeled `(推荐)`. `Other` (auto-provided by the tool) covers any other project or the inbox.
+- **优先级 (single-select)** — `p1` / `p2` / `p3` / `p4`, with the value read off the brief's urgency/ticket signals placed first; no signal → `p4` default.
+
+Do **not** menu the due/deadline — only when the brief implies a time, ask one text line afterward (`dueString` for a soft schedule, `deadlineDate` `YYYY-MM-DD` for a hard constraint). The menu answers **are** the explicit confirmation; Esc → don't create. This is still a recommendation, never a silent auto-set — the menu just makes the recommendation clickable. If nothing matched, the recommended option is the inbox. Then create:
 
 ```
 mcp__claude_ai_todoist__add-tasks {
