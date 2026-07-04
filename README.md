@@ -1,6 +1,6 @@
 # auftragstaktik
 
-A Claude Code skill named **`auftrag`**. It presses you to think a delegation through *before* you hand a task to an agent.
+A Claude Code **plugin** for mission-command delegation: it presses you to think a delegation through *before* you hand it to an agent, then makes sure the agent **cannot silently fail** after you do.
 
 ## Where it comes from
 
@@ -10,41 +10,44 @@ A Claude Code skill named **`auftrag`**. It presses you to think a delegation th
 
 The conclusion: stop remote-controlling the front line. Say clearly what must be achieved and *why*, and which few lines must never be crossed — then hand the freedom of *how* to whoever has the freshest information.
 
-Delegating to an agent is exactly this. And it matters more for agents, because they have two failures a human report doesn't: **they fail confidently** (silence ≠ success), and **they fill ambiguity toward the training-data average, not toward your context.** So "when to stop and ask me" and "the red lines" have to be spelled out at the moment you delegate.
+Delegating to an agent is exactly this, and it matters more for agents: **they fail confidently** (silence ≠ success), and **they fill ambiguity toward the training-data average, not toward your context.** So the contract must be explicit at dispatch time — and, because no brief survives contact either, the contract must also be **enforced at runtime** by machinery the executor can't sweet-talk.
 
-## What the skill does
-
-It guides you to fill out a **five-box Auftrag**, lands it in Todoist, then asks whether to dispatch it:
-
-1. **Intent / why** — the heaviest box; the only thing that lets the agent recover when the plan hits reality
-2. **Target state** — the state to reach, not the steps to walk
-3. **Boundaries / red lines** — only the few hard constraints that must never be crossed
-4. **Escalation / stop and ask me** — the most-often-omitted box
-5. **Done-criteria / evidence** — empty means you can't proceed
-
-Its real value isn't the table — it's that **when you answer thin, it asks one more**, with the fire aimed at the two boxes that get watered down: *why* and *escalation*. And it **asks, never writes**: Intent is the part you must not outsource, and the moment it drafts for you, you'll nod a mediocre version through.
-
-## Using it
-
-Trigger: `/auftrag`, `/派活`, or a phrase like "认真派个活". Then:
+## The pipeline
 
 ```
-you dump the task in one go → it sorts your words into the five boxes, chases only the thin ones
-→ boxes clear the bar (why + escalation solid, done-criteria non-empty) → it assembles a brief for review
-→ lands in Todoist → asks "dispatch now, or store?"
+/auftrag   contract-first briefing (five boxes; verify + evidence dual-track Done)
+    │            └─ type routing: delegate / learn (prep only) / decide (staff memo only)
+    ▼
+dispatch   Todoist landing + WIP cap (3) + background worktree executor
+    ▼
+verify gate   Stop-hook runs the contract's verify commands — can't declare
+    │         victory against a red check; gives up LOUDLY (RED) after N tries
+    ▼
+/abnahme   independent acceptance: fresh-context adversarial examiner (pruefer),
+    │      re-runs checks, hunts check-gaming; only Abnahme may grant green
+    ▼
+/board     exception queue: blocked > red > green; you never poll
+/catchup   O(1) re-entry into any one task
 ```
+
+State machine, carried as Todoist labels: `agent:running → agent:blocked | agent:red | agent:green → done`. Executors may confess (blocked/red) but never self-certify (green).
 
 ## Repo layout
 
 | Path | What it is |
 |---|---|
-| `SKILL.md` | **The deliverable** — the skill itself (`name: auftrag`), a thin orchestrator |
-| `references/grill-heuristics.md` | The follow-up heuristics (the crown jewel; iterated most) |
-| `references/dispatch.md` | Phase 4 plumbing: Todoist write + subagent dispatch |
-| `CONCEPT.md` | The original concept doc (in Chinese), kept as provenance |
-| `docs/DESIGN.md` | Design decisions and trade-offs |
-| `INSTALL.md` | How to install into `~/.claude/skills/` |
+| `.claude-plugin/` | Plugin + marketplace manifests |
+| `skills/auftrag/` | The briefing interview (the original skill) + `references/` (grill heuristics, dispatch, lanes) |
+| `skills/abnahme/` | Independent acceptance flow (the second key) |
+| `skills/board/`, `skills/catchup/` | Exception queue + re-entry |
+| `skills/todoist-sync/` | Bind a session to a Todoist task (`/start-todo` etc.) |
+| `agents/pruefer.md` | The adversarial examiner subagent Abnahme spawns |
+| `hooks/hooks.json`, `scripts/` | Stop/SubagentStop verify gate + optional notification fan-out |
+| `CONCEPT.md` | Original concept doc (Chinese), kept as provenance |
+| `docs/DESIGN.md` | v0 design decisions (the interview) |
+| `docs/workflow-design.md` | The full pipeline design: pain-point critique, evidence, phased rollout |
+| `INSTALL.md` | Plugin installation |
 
 ## Status
 
-v0. Deliberately small: pure prompt — no hooks, no validation scripts, no resident agents. Tighten precisely once it's been used a dozen times and the leaks show.
+v0.2 — Phase 0+1 of `docs/workflow-design.md`: authoring (v0, battle-tested shape) + runtime enforcement (gate, Abnahme, board, catchup — new, expects its first dozen real missions). The interview itself remains pure prompt; all enforcement lives after dispatch. Ledger-driven retro (`/retro`) is Phase 2, deliberately not built until ~20 missions of data exist.

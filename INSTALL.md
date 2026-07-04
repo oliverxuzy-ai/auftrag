@@ -1,42 +1,58 @@
-# Installing into local Claude Code
+# Installing the auftragstaktik plugin
 
-The skill is `SKILL.md` (`name: auftrag`) plus its `references/`. Installing it means putting those where Claude Code scans for skills.
+The repo **is** the plugin (and its own marketplace). Everything installs together: the skills (`auftrag`, `abnahme`, `board`, `catchup`, `todoist-sync`), the `pruefer` examiner agent, and the verify-gate hooks.
 
-## Option 1: Copy (simple, independent per machine)
+## Install (persistent)
+
+Inside any Claude Code session:
+
+```
+/plugin marketplace add /Users/zhengyangxu/Desktop/side_project/auftrag
+/plugin install auftragstaktik@auftragstaktik
+```
+
+Then restart or `/reload-plugins`.
+
+> **Remove old standalone copies first.** If `~/.claude/skills/auftrag` or `~/.claude/skills/todoist-sync` still exist from the pre-plugin era, delete them — standalone skills shadow the plugin versions, so you'd silently keep running the stale ones.
+
+## Skill names after install
+
+Plugin skills are namespaced: `/auftragstaktik:auftrag`, `/auftragstaktik:abnahme`, `/auftragstaktik:board`, `/auftragstaktik:catchup`, `/auftragstaktik:start-todo`-style commands come from `todoist-sync`. Typing the short form (e.g. `/auftrag`) still finds them via fuzzy match, and trigger phrases ("认真派个活", "what needs me") invoke them model-side as before.
+
+## Updating after you edit the repo
+
+Installed plugins are **cached copies** — repo edits don't apply live. After changing anything:
+
+```
+/plugin marketplace update auftragstaktik
+```
+
+(or reinstall). For a live-editing dev loop instead, run a session with the repo mounted directly:
 
 ```bash
-mkdir -p ~/.claude/skills/auftrag
-cp -R SKILL.md references ~/.claude/skills/auftrag/
+claude --plugin-dir /Users/zhengyangxu/Desktop/side_project/auftrag
 ```
 
-Then trigger it in Claude Code with `/auftrag` or "派个活".
+then `/reload-plugins` picks up edits without restarting.
 
-> Runtime needs `SKILL.md` + `references/`. `CONCEPT.md` / `docs/` / `README.md` are for humans and can be left out.
+## One-time environment setup (Phase 0 of the workflow design)
 
-## Option 2: Symlink (tracks the git repo, edits apply live)
+1. **Phone push**: `"agentPushNotifEnabled": true` in `~/.claude/settings.json`, and pair once with `claude remote-control` — BLOCKED/RED raises its hand on your phone, with presence detection so it stays quiet while you're at the keyboard.
+2. **Optional extra channels**: export `AUFTRAG_NTFY_TOPIC=<topic>` and/or `AUFTRAG_DISCORD_WEBHOOK=<url>` to fan background-agent notifications out through `scripts/notify.sh`. Unset = no-op.
+3. **Todoist labels**: created on first dispatch automatically (`auftrag`, `agent:running`, `agent:blocked`, `agent:red`, `agent:green`, `lane:learn`).
 
-If you want the local skill to always equal the repo's latest (handy while iterating):
-
-```bash
-ln -s "$(pwd)" ~/.claude/skills/auftrag
-```
-
-Edits to `SKILL.md` or `references/` in the repo take effect immediately; no re-copy after `git pull`. The cost: `~/.claude/skills/auftrag/` will also contain `README.md`, `docs/`, etc. — harmless; Claude Code only reads `SKILL.md` and what it references.
-
-## Verify
-
-After installing, ask Claude Code to list skills, or just:
+## Verify the install
 
 ```
-/auftrag
+/auftragstaktik:auftrag       → opens with "give me the whole thing, in one go"
+/auftragstaktik:board         → renders a MELDUNG block (empty queue is fine)
 ```
 
-It should open with a single line like "tell me the whole thing you're about to delegate, in one go" — not dump a five-box table at you — and, when it reaches the follow-up phase, actually load `references/grill-heuristics.md`.
+Gate smoke test: in any scratch repo, create `.claude/auftrag/active.md` with frontmatter `verify:` containing `- false`, ask the session to finish something — it should get bounced by `[AUFTRAG VERIFY GATE]`; change to `- true` and it should pass with "Auftrag gate ✅". Delete the file afterward.
 
 ## Uninstall
 
-```bash
-rm -rf ~/.claude/skills/auftrag        # copy method
-# or
-rm ~/.claude/skills/auftrag            # symlink method
+```
+/plugin uninstall auftragstaktik@auftragstaktik
+/plugin marketplace remove auftragstaktik
 ```

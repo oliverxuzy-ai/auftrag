@@ -21,14 +21,15 @@ Ask **one question at a time**; wait for the answer before the next. Aim the fir
 | **Target state** | Written as steps / a route | "That's the route to march. Give me the objective: once we're there, what's true?" |
 | **Boundaries** | Preferences dressed as red lines; a long list | "Cross it and still take the objective — does it matter? If not, it's a preference, not a red line; I'd cut it." / "Which of these does CLAUDE.md already hold? Cite those, don't re-list." |
 | **Escalation** | Empty; or "ask me if you're unsure" | "A unit in the field never *feels* unsure — it presses on. So name the *situations*: which class of call is yours, not its? Where's the cost high and hard to undo?" |
-| **Done-criteria** | Empty (**hard-stop**); or "I'll know when it's done" | "Name the check and the result you expect — 'ran X, saw Y.' Without it, no one on the ground knows where to halt." |
+| **Done-criteria** | Empty (**hard-stop**); or "I'll know when it's done"; or prose with no runnable check | "Name the check and the result you expect — 'ran X, saw Y.' Without it, no one on the ground knows where to halt." Then the machine question: "Can a machine run that check? If yes — give me the exact command; the gate will hold the line with it while you sleep. If no — say why not, and name the manual recipe: who looks at what, for how many minutes?" |
+| **Done-criteria · gaming test** | verify commands the agent could trivially satisfy without doing the work (e.g. "tests pass" when no test covers the change) | "If a lazy unit wanted to get past this check without taking the objective — could it? For code: has the check been seen **failing** first?" |
 
 ### Tri-state source for the progress tracker
 
 The tracker in `SKILL.md` shows one glyph per box; this table is what defines them:
 - **○ empty** — the box has no answer yet.
-- **◐ thin** — the box has an answer, but it trips the "tell" column above (Intent that restates the task, Target written as steps, Boundaries that are preferences, Escalation that's empty or "ask if unsure", etc.).
-- **● solid** — the answer cleared the challenge.
+- **◐ thin** — the box has an answer, but it trips the "tell" column above (Intent that restates the task, Target written as steps, Boundaries that are preferences, Escalation that's empty or "ask if unsure", Done that's prose with no runnable check and no justified manual recipe, etc.).
+- **● solid** — the answer cleared the challenge. For Done, solid = at least one runnable `verify` command, **or** an explicit "why no machine check" plus a manual evidence recipe (SKILL.md's Verify-or-justify rule).
 
 Re-render the tracker whenever a box crosses one of these thresholds — that's the cadence, never once-per-turn.
 
@@ -42,7 +43,7 @@ Re-render the tracker whenever a box crosses one of these thresholds — that's 
 
 While pressing on *why*, if either signal surfaces, **flag it on the spot** — a staff officer says so before the order goes out — give the commander the call, don't barrel ahead:
 
-- **"The value here is actually me learning it"** → delegating to an agent cancels that value. Suggest pulling it out of the delegate pile and doing it yourself, serially.
-- **"This is really a decision, not a task"** → that's the user's own work, not a delegation target. Suggest they make the decision first.
+- **"The value here is actually me learning it"** → delegating the *learning* cancels the value — but the **prep** is delegable. Suggest routing it down the learn lane (`references/lanes.md`): an agent builds the study pack; the eating stays with the commander, serial.
+- **"This is really a decision, not a task"** → the *call* is the commander's own work — but the **staff work** is delegable. Suggest the decide lane (`references/lanes.md`): an agent prepares the decision memo; the commander decides.
 
-Not a hard block — a heads-up plus a choice. Filling in *why* honestly tends to trigger this triage on its own.
+Not a hard block — a heads-up plus a choice. Filling in *why* honestly tends to trigger this triage on its own. **Record the outcome as the brief's `type` field** (`delegate` / `learn` / `decide`); Phase 4's dispatch routes on it.

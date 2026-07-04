@@ -1,0 +1,14 @@
+{
+  "name": "auftragstaktik",
+  "description": "Mission-command delegation pipeline for Claude Code — brief it right once, then let failure raise its own hand.",
+  "owner": {
+    "name": "Oliver Xu"
+  },
+  "plugins": [
+    {
+      "name": "auftragstaktik",
+      "source": "./",
+      "description": "Contract-first delegation (Auftrag), deterministic verify gate, independent acceptance (Abnahme), exception board, and re-entry — the full dispatch-to-acceptance pipeline."
+    }
+  ]
+}

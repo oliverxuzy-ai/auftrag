@@ -1,0 +1,8 @@
+{
+  "name": "auftragstaktik",
+  "description": "Mission-command delegation for Claude Code: contract-first briefing (/auftrag), a deterministic verify gate that blocks agents from declaring victory, independent acceptance (/abnahme), an exception board (/board), and O(1) re-entry (/catchup).",
+  "version": "0.2.0",
+  "author": {
+    "name": "Oliver Xu"
+  }
+}

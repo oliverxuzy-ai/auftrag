@@ -21,7 +21,7 @@ It matters more for agents than for people, because agents have two failure mode
 2. **Target state** — the **state** to reach, not the steps to walk. "Take that bridge," not "march down this road in this formation."
 3. **Boundaries / red lines** — **only** the few hard constraints that must never be crossed; everything else is freedom. The point is minimization.
 4. **Escalation / stop and ask me** — the situations where the agent should halt and hand the decision back to you. The most-often-omitted box.
-5. **Done-criteria / evidence** — the concrete check that proves the target state was reached: what you ran, what you got. Not "I think it's done."
+5. **Done-criteria / evidence** — two tracks, both mattering. **verify** (machine track): commands that prove the target state — exit 0 = pass; the runtime gate and Abnahme re-run these, so the agent *cannot* declare victory against a red check. **evidence** (human track): what the commander looks at in ≤60 seconds to accept. Not "I think it's done." Where no runnable check is possible, the commander must say why, and the evidence recipe carries the whole weight.
 
 ## Hard rules
 
@@ -29,9 +29,10 @@ It matters more for agents than for people, because agents have two failure mode
 |---|---|
 | **Ask, don't write** | The words in all five boxes must come **from the user**. You may point out that an answer is thin — "that's a restatement, not a reason"; "that's a preference, not a red line"; "that's too vague for an agent" — and ask a sharper question. You **never** draft, complete, or "suggest wording for" a box. ⚠️ This **overrides** `grilling`'s "give a recommended answer" — here you give questions, not answers. Operational detail in `references/grill-heuristics.md`. |
 | **Done-criteria hard-stop** | While Done-criteria is empty: do **not** assemble the brief, do **not** write to Todoist. But ask **once**, pointedly, and say *why it's the gate* — then hold and wait. No repeated nagging. |
-| **Go/no-go = two boxes and a half** | Proceed when **Intent + Escalation are substantive AND Done-criteria is non-empty.** Don't gate on how "full" Target state / Boundaries are. |
+| **Verify-or-justify** | Done-criteria counts as **solid** only with at least one machine-runnable `verify` command, **or** the commander's explicit reason why none exists plus a manual evidence recipe (who looks at what, for how many minutes). An unrunnable Done box is where silent failure hides. |
+| **Go/no-go = two boxes and a half** | Proceed when **Intent + Escalation are substantive AND Done-criteria is non-empty** (non-empty per Verify-or-justify). Don't gate on how "full" Target state / Boundaries are. |
 | **Minimize boundaries + reference** | Keep only constraints the overall goal actually requires. Anything already covered by CLAUDE.md or an existing skill → one "inherits:" line in the brief, not a re-listing. |
-| **Not a system** | No resident agents, no inter-agent messaging, no state sync. The closing dispatch is a one-shot. v0 ships no hooks, no validation scripts. |
+| **Not a system (authoring side)** | The interview stays pure prompt: no resident agents, no inter-agent messaging, no hooks *inside this flow*. Runtime enforcement — the verify gate, `/abnahme`, `/board` — lives in sibling plugin modules and binds only **after** dispatch. Boundary ruling recorded in `docs/workflow-design.md` §5. |
 
 ## The flow
 
@@ -60,6 +61,18 @@ Attribute what they dumped into the five boxes. Sorting means placing **their wo
 Once the boxes clear the go/no-go bar, assemble them into a brief **in the user's own words** and show it to them. For any boundary or done-check already covered by CLAUDE.md or an existing skill, write one "inherits:" line instead of repeating it. Template:
 
 ```
+---
+auftrag: <task-slug>
+type: <delegate | learn | decide — from the Phase 2.5 triage; default delegate>
+risk: <reversible | irreversible — confirmed in Phase 4>
+todoist: <task url — filled in Phase 4>
+max_attempts: 5
+verify:
+  - <exact command; exit 0 = pass>
+evidence:
+  - <what the commander looks at in ≤60 seconds>
+---
+
 # Auftrag: <one-line task name>
 
 ## Intent / why
@@ -70,14 +83,21 @@ Once the boxes clear the go/no-go bar, assemble them into a brief **in the user'
 
 ## Boundaries / red lines
 - <only the constraints specific to this task>
+- Never weaken, skip, or game a verify check to make it pass (standing red line on every Auftrag)
 - Inherits: CLAUDE.md + <named skill> (not repeated here)
 
 ## Escalation / stop and ask me
 - <specific stop-and-ask situations>
+- A verify check itself looks wrong → that's an escalation, not a thing to "fix"
 
 ## Done-criteria / evidence
-- <run X → expect Y>
+verify (machine track — the gate and Abnahme run these):
+- <run X → exit 0>
+evidence (human track — the commander's 60-second acceptance):
+- <artifact to attach / lines to show>
 ```
+
+> The frontmatter is **plumbing, not prose** — the runtime gate and `/abnahme` read it. Writing it does not violate ask-don't-write: the five boxes below it stay in the commander's words; `type` records the Phase 2.5 triage; `risk` and placement are confirmed by menu in Phase 4 (widgets on seams only). The `verify` lines are the commander's own Done-criteria commands, transcribed verbatim.
 
 **Phase 4 — Land in Todoist + dispatch or store**
 → **Read `references/dispatch.md` and follow it.** Land in Todoist first (the brief is the draft; create only on an explicit `yes`), hand back the URL, then ask "dispatch now, or store it?"
@@ -85,8 +105,8 @@ Once the boxes clear the go/no-go bar, assemble them into a brief **in the user'
 ## This skill's own red lines (eat the dog food)
 
 - **Ask, don't write** — hard rule #1, the foundation of the whole skill.
-- **Don't rush to add hooks / validation scripts / automation** — v0 stays as small as possible.
-- **Don't make it a system** — a guided flow + a template + a Todoist write + one closing question, that's all.
+- **Keep the interview pure prompt** — no hooks or validation scripts *inside the authoring flow*. Runtime enforcement lives after dispatch, in the plugin's sibling modules (verify gate, `/abnahme`, `/board`) — not here.
+- **Don't make it a system** — a guided flow + a template + a Todoist write + one closing question, that's all this skill is.
 - **Don't turn the boundaries box into a big checklist** — the boundaries it guides the user to write stay minimal, and so does its own complexity.
 - **Interactive widgets only on the seams, never on the box contents** — the tracker, the Todoist placement menu, and the dispatch/store menu are the only interactive controls, and they sit on decision/navigation/confirmation seams. The instant a menu offers candidate *answers* for any of the five boxes, this skill has committed its own #1 sin (writing the commander's words). Tracker = state glyphs only; Todoist menu = metadata only; dispatch preview = echoes only what's about to be sent.
 
